@@ -1,0 +1,190 @@
+<html>
+  <head>
+    <style media="screen">
+      #grid {
+        position: relative;
+        width: 500px;
+        height: 500px;
+        background: url('./sl.jpeg');
+        background-size: contain;
+      }
+      .box {
+        width: 50px;
+        height: 50px;
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .player {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        -webkit-transition-property: top, left;
+        -webkit-transition-duration: 0.5s;
+      }
+      #player1 {
+        background: red;
+        top: 450px;
+        left: 0;
+      }
+      #player2 {
+        background: blue;
+        top: 480px;
+        left: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="gridcontainer">
+        <div id="grid">
+          <div id="player1" class="player">1</div>
+          <div id="player2" class="player">2</div>
+        </div>
+      </div>
+      <div class="players">
+        <p>Current player: <span id="currentPlayer"></span></p>
+        <p>Dice value: <span id="dice"></span></p>
+        <button id="dicebtn" onclick="flip()">Dice</button>
+        <button onclick="reset()">reset</button>
+        <p id="winner"></p>
+      </div>
+    </div>
+    <script>
+    var grid = document.getElementById('grid');
+    var snakes = {
+      99: 69,
+      91: 61,
+      87: 57,
+      65: 52,
+      47: 19,
+      34: 1,
+      25: 5
+    };
+    var ladders = {
+      3: 51,
+      6: 27,
+      20: 70,
+      36: 55,
+      63: 95,
+      68: 98
+    };
+    var players = {
+      player1: 1,
+      player2: 1
+    };
+    var currentPlayer = 'player1';
+    var mapping = {
+      100: {
+        top: 0,
+        left: 450
+      }
+    };
+    var div = document.createElement("DIV");
+    div.style.top = `${mapping[100].top}px`;
+    div.style.left = `${mapping[100].left}px`;
+    div.className = 'box';
+    grid.appendChild(div);
+    displayCurrentPlayer();
+
+    for (var i = 99; i >= 1; i -= 1) {
+      if (i % 10 === 0) {
+        mapping[i] = {
+          top: mapping[i + 1].top + 50,
+          left: 450
+        };
+      } else {
+        mapping[i] = {
+          top: mapping[i + 1].top,
+          left: mapping[i + 1].left - 50
+        };
+      }
+      var div = document.createElement("DIV");
+      div.style.top = `${mapping[i].top}px`;
+      div.style.left = `${mapping[i].left}px`;
+      div.className = 'box';
+      grid.appendChild(div);
+    }
+
+    function getDiceValue() {
+      return Math.floor(Math.random() * 6 + 1);
+    }
+
+    function disableFlipBtn(val) {
+      document.getElementById('dicebtn').disabled = val;
+    }
+
+    function checkWinner(val) {
+      if (val === 100) {
+        disableFlipBtn(true);
+        document.getElementById('winner').innerHTML = 'Winner is: ' + currentPlayer;
+      }
+    }
+
+    function flip() {
+      disableFlipBtn(true);
+      var dice = getDiceValue();
+      document.getElementById('dice').innerHTML = dice;
+      var nextvalue = players[currentPlayer] + dice;
+      if (nextvalue <= 100) {
+        if (snakes[nextvalue]) {
+          console.log('SNAKE');
+          players[currentPlayer] = snakes[nextvalue];
+          movePlayer(currentPlayer);
+          currentPlayer = currentPlayer === 'player1' ?  'player2' : 'player1';
+        } else if (ladders[nextvalue]) {
+          console.log('LADDER');
+          players[currentPlayer] = ladders[nextvalue];
+          movePlayer(currentPlayer);
+        } else if (dice === 6) {
+          players[currentPlayer] = nextvalue;
+          movePlayer(currentPlayer);
+          checkWinner(nextvalue);
+        } else {
+          players[currentPlayer] = nextvalue;
+          movePlayer(currentPlayer);
+          checkWinner(nextvalue);
+          currentPlayer = currentPlayer === 'player1' ?  'player2' : 'player1';
+        }
+      } else {
+        currentPlayer = currentPlayer === 'player1' ?  'player2' : 'player1';
+      }
+      displayCurrentPlayer();
+      if (nextvalue !== 100) {
+        disableFlipBtn(false);
+      }
+    }
+
+    function reset() {
+      players = {
+        player1: 1,
+        player2: 1
+      };
+      disableFlipBtn(false);
+      currentPlayer = 'player1';
+      displayCurrentPlayer();
+      movePlayer('player1');
+      movePlayer('player2');
+      document.getElementById('dice').innerHTML = '';
+      document.getElementById('winner').innerHTML = '';
+    }
+
+    function displayCurrentPlayer() {
+      var s = document.getElementById('currentPlayer');
+      s.innerHTML = currentPlayer;
+    }
+
+    function movePlayer(player) {
+      var p = document.getElementById(player);
+      p.style.top = mapping[players[player]].top;
+      p.style.left = mapping[players[player]].left;
+    }
+
+    </script>
+  </body>
+</html>
