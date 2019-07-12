@@ -5,7 +5,7 @@
         position: relative;
         width: 500px;
         height: 500px;
-        background: url('./sl.jpeg');
+        background: url('./bg.jpg');
         background-size: contain;
       }
       .box {
@@ -91,7 +91,6 @@
     div.className = 'box';
     grid.appendChild(div);
     displayCurrentPlayer();
-
     for (var i = 99; i >= 1; i -= 1) {
       if (i % 10 === 0) {
         mapping[i] = {
@@ -110,48 +109,37 @@
       div.className = 'box';
       grid.appendChild(div);
     }
-
     function getDiceValue() {
       return Math.floor(Math.random() * 6 + 1);
     }
-
     function disableFlipBtn(val) {
       document.getElementById('dicebtn').disabled = val;
     }
-
     function checkWinner(val) {
       if (val === 100) {
         disableFlipBtn(true);
         document.getElementById('winner').innerHTML = 'Winner is: ' + currentPlayer;
       }
     }
-
-    function flip() {
-      disableFlipBtn(true);
-      var dice = getDiceValue();
-      document.getElementById('dice').innerHTML = dice;
-      var nextvalue = players[currentPlayer] + dice;
-      if (nextvalue <= 100) {
-        if (snakes[nextvalue]) {
-          console.log('SNAKE');
-          players[currentPlayer] = snakes[nextvalue];
-          movePlayer(currentPlayer);
-          currentPlayer = currentPlayer === 'player1' ?  'player2' : 'player1';
-        } else if (ladders[nextvalue]) {
-          console.log('LADDER');
-          players[currentPlayer] = ladders[nextvalue];
-          movePlayer(currentPlayer);
-        } else if (dice === 6) {
-          players[currentPlayer] = nextvalue;
-          movePlayer(currentPlayer);
-          checkWinner(nextvalue);
-        } else {
-          players[currentPlayer] = nextvalue;
-          movePlayer(currentPlayer);
-          checkWinner(nextvalue);
-          currentPlayer = currentPlayer === 'player1' ?  'player2' : 'player1';
-        }
-      } else {
+    const p1 = document.getElementById('player1');
+    const p2 = document.getElementById('player1');
+    // Code for Chrome, Safari and Opera
+    p1.addEventListener("webkitAnimationEnd", onend);
+    p2.addEventListener("webkitAnimationEnd", onend);
+    // Standard syntax
+    p1.addEventListener("animationend", onend);
+    p2.addEventListener("animationend", onend);
+    function onend() {
+      if (snakes[nextvalue]) {
+        console.log('SNAKE');
+        players[currentPlayer] = snakes[nextvalue];
+        movePlayer(currentPlayer);
+        currentPlayer = currentPlayer === 'player1' ?  'player2' : 'player1';
+      } else if (ladders[nextvalue]) {
+        console.log('LADDER');
+        players[currentPlayer] = ladders[nextvalue];
+        movePlayer(currentPlayer);
+      } else if (dice !== 6) {
         currentPlayer = currentPlayer === 'player1' ?  'player2' : 'player1';
       }
       displayCurrentPlayer();
@@ -159,7 +147,41 @@
         disableFlipBtn(false);
       }
     }
-
+    function flip() {
+      disableFlipBtn(true);
+      var dice = getDiceValue();
+      document.getElementById('dice').innerHTML = dice;
+      var nextvalue = players[currentPlayer] + dice;
+      if (nextvalue <= 100) {
+        players[currentPlayer] = nextvalue;
+        movePlayer(currentPlayer);
+        checkWinner(nextvalue);
+        setTimeout(() => {
+          if (snakes[nextvalue]) {
+            console.log('SNAKE');
+            players[currentPlayer] = snakes[nextvalue];
+            movePlayer(currentPlayer);
+            currentPlayer = currentPlayer === 'player1' ?  'player2' : 'player1';
+          } else if (ladders[nextvalue]) {
+            console.log('LADDER');
+            players[currentPlayer] = ladders[nextvalue];
+            movePlayer(currentPlayer);
+          } else if (dice !== 6) {
+            currentPlayer = currentPlayer === 'player1' ?  'player2' : 'player1';
+          }
+          displayCurrentPlayer();
+          if (nextvalue !== 100) {
+            disableFlipBtn(false);
+          }
+        }, 501);
+      } else {
+        currentPlayer = currentPlayer === 'player1' ?  'player2' : 'player1';
+        displayCurrentPlayer();
+        if (nextvalue !== 100) {
+          disableFlipBtn(false);
+        }
+      }
+    }
     function reset() {
       players = {
         player1: 1,
@@ -173,18 +195,15 @@
       document.getElementById('dice').innerHTML = '';
       document.getElementById('winner').innerHTML = '';
     }
-
     function displayCurrentPlayer() {
       var s = document.getElementById('currentPlayer');
       s.innerHTML = currentPlayer;
     }
-
     function movePlayer(player) {
       var p = document.getElementById(player);
-      p.style.top = mapping[players[player]].top;
-      p.style.left = mapping[players[player]].left;
+      p.style.top = `${mapping[players[player]].top}px`;
+      p.style.left = `${mapping[players[player]].left}px`;
     }
-
     </script>
   </body>
 </html>
